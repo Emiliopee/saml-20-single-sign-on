@@ -153,40 +153,35 @@ class SAML_Client
    *
    * @return string
    */
-  private function update_role()
+private function update_role()
   {
     $attrs = $this->saml->getAttributes();
     if(array_key_exists($this->settings->get_attribute('groups'), $attrs) )
     {
-      $role = array();
       foreach(wp_roles()->roles as $role_name => $role_meta){
           if( in_array($this->settings->get_group($role_name),$attrs[$this->settings->get_attribute('groups')]) )
           {
-            $role[] = $role_name;
+            $role = $role_name;
           }
       }
-      if(!empty($role)){}
+    }
+    else
+    {
+      if(isset($role)){}
       elseif( $this->settings->get_allow_unlisted_users() )
       {
-        $role[] = 'subscriber';
+        $role = 'subscriber';
       }
       else
       {
         $role = false;
       }
     }
-    else
-    {
-      $role = false;
-    }
 
     $user = get_user_by('login',$attrs[$this->settings->get_attribute('username')][0]);
     if($user)
     {
-      $user->set_role('');
-      foreach($role as $user_role) {
-        $user->add_role($user_role);
-      }
+      $user->set_role($role);
     }
 
     return $role;
